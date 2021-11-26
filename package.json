@@ -8,17 +8,22 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
+    "lodash.throttle": "^4.1.1",
+    "lodash.trim": "^4.5.1",
     "vue": "^2.6.11",
     "vue-class-component": "^7.2.3",
-    "vue-property-decorator": "^9.1.2"
+    "vue-property-decorator": "^9.1.2",
+    "vue-scrollbar-simple": "0.0.10"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-typescript": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
+    "lodash.clonedeep": "^4.5.0",
     "node-sass": "^4.12.0",
     "sass-loader": "^8.0.2",
     "typescript": "~4.1.5",
+    "vue-msgs": "^1.0.6",
     "vue-template-compiler": "^2.6.11"
   }
 }
