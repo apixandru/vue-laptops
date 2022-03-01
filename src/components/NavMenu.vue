@@ -37,7 +37,7 @@ export default {
   name: 'NavMenu',
   data() {
     return {
-      logoText: 'Laptops for all',
+      logoText: 'Generic Website Name',
       menus: [{
         key: 'default',
         name: 'Lenovo Outlet',

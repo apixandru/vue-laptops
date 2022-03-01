@@ -10,6 +10,7 @@
           <vue-input v-if="enableSearch" class="tools-search" v-model="searchValue" placeholder="Search">
             <i class="iconfont iconsearch" slot="prefix"></i>
           </vue-input>
+          {{label}}
         </div>
         <div style="flex: 1"></div>
         <div class="table-pagination" v-if="pagination" ref="paginationWrapper">
@@ -23,8 +24,7 @@
               :lang="lang"
               @current-page="onPageChange"
               @size="onPageSizeChange"
-              ref="tablePagination"
-          >
+              ref="tablePagination">
           </vue-pagination>
         </div>
       </div>
@@ -194,7 +194,10 @@
                         @blur="onCellBlur(tableCell, tableRow.index, j)"
                         @keydown.enter.stop.prevent="onCellKeyEnter"
                     >
-                      {{ tableCell.data }}
+                      <span v-if="typeof tableCell.data === 'string' && tableCell.data.indexOf('https://') === 0" v-html="'<a href=' + tableCell.data + '>Click</a>'"></span>
+                      <span v-else>{{ tableCell.data }}</span>
+<!--                      {{ tableCell.data }}-->
+<!--                      {{ typeof tableCell.data === 'string' && tableCell.data.indexOf('https://') === 0 ? tableCell.data : tableCell.data}}-->
                     </span>
                   </slot>
                 </div>
@@ -408,6 +411,7 @@ export default {
   data() {
     return {
       tableData: {},
+      label: '',
       searchValue: '',
       activatedSort: {},
       activatedFilter: {},
@@ -776,9 +780,6 @@ export default {
     this.handleResize = null
   },
   methods: {
-    /**
-     * @function 初始化Table数据
-     */
     initData(sourceData) {
       if (this.params && is2DMatrix(sourceData)) {
         let table = {key: unique(`table-`), checked: false, rows: [], activatedRows: [], filteredRows: {}}
@@ -790,6 +791,7 @@ export default {
           table.rows.push(tableRow)
         }
         this.tableData = table
+        this.label = this.params.label;
 
         if (this.pagination) {
           this.$nextTick(this.updatePagination)

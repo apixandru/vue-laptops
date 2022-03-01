@@ -15,12 +15,12 @@ function extractAndSet(target, values, mappingFunction) {
 
 function findCpu(input: LaptopFilters, lm: LaptopModel): CpuMapping {
     let matchedCpuMapping = input.cpuMappings.find(cpuMapping => cpuMapping.name === lm.cpu);
-    if (!matchedCpuMapping) {
+    if (!matchedCpuMapping || !matchedCpuMapping.family) {
         console.log(`Failed to map cpu ${lm.cpu}`);
         return {
             name: lm.cpu,
-            family: lm.cpu,
-            brand: lm.cpu,
+            family: '*Unmapped*',
+            brand: '*Unmapped*',
             shortName: lm.cpu
         }
     }
@@ -29,12 +29,12 @@ function findCpu(input: LaptopFilters, lm: LaptopModel): CpuMapping {
 
 function findGpu(input: LaptopFilters, lm: LaptopModel): GpuMapping {
     let matchedGpuMapping = input.gpuMappings.find(cpuMapping => cpuMapping.name === lm.gpu);
-    if (!matchedGpuMapping) {
+    if (!matchedGpuMapping || !matchedGpuMapping.family) {
         console.log(`Failed to map gpu ${lm.gpu}`);
         return {
             name: lm.gpu,
-            family: lm.gpu,
-            brand: lm.gpu
+            family: '*Unmapped*',
+            brand: '*Unmapped*'
         }
     }
     return matchedGpuMapping;
@@ -42,11 +42,11 @@ function findGpu(input: LaptopFilters, lm: LaptopModel): GpuMapping {
 
 function findRam(input: LaptopFilters, lm: LaptopModel): RamMapping {
     let matchedRamMapping = input.ramMappings.find(ramMapping => ramMapping.name === lm.ram);
-    if (!matchedRamMapping) {
+    if (!matchedRamMapping || !matchedRamMapping.summary) {
         console.log(`Failed to map ram ${lm.ram}`);
         return {
             name: lm.ram,
-            summary: lm.ram
+            summary: '*Unmapped*'
 
         }
     }
@@ -55,11 +55,11 @@ function findRam(input: LaptopFilters, lm: LaptopModel): RamMapping {
 
 function findStorage(input: LaptopFilters, lm: LaptopModel): RamMapping {
     let searchedMapping = input.storageMappings.find(ramMapping => ramMapping.name === lm.storage);
-    if (!searchedMapping) {
+    if (!searchedMapping || !searchedMapping.summary) {
         console.log(`Failed to map storage ${lm.storage}`);
         return {
             name: lm.storage,
-            summary: lm.storage
+            summary: '*Unmapped*'
 
         }
     }
@@ -118,8 +118,6 @@ export const filterValueChanged = (input: LaptopFilters, filterValue, allData) =
     let filtered = input.items;
     setCpuBrandValues(filtered, allData, input);
     setGpuBrandValues(filtered, allData, input);
-    setRamValues(filtered, allData, input)
-    setStorageValues(filtered, allData, input)
     allData.ram.sort((a, b) => Number.parseInt(b.text) - Number.parseInt(a.text))
     allData.storage.sort((a, b) => Number.parseInt(b.text) - Number.parseInt(a.text))
 
@@ -137,12 +135,15 @@ export const filterValueChanged = (input: LaptopFilters, filterValue, allData) =
     let cpus = filtered.filter(laptop => cpuFamilyFilter.length === 0 || cpuFamilyFilter.includes(findCpu(input, laptop).family));
     let gpus = filtered.filter(laptop => gpuFamilyFilter.length === 0 || gpuFamilyFilter.includes(findGpu(input, laptop).family));
     setCpuModelValues(cpus, allData, input)
-    setGpuModelValues(gpus, allData, input)
 
+    setGpuModelValues(gpus, allData, input)
     filtered = cpus.filter(laptop => gpuFamilyFilter.length === 0 || gpuFamilyFilter.includes(findGpu(input, laptop).family));
+
+    setRamValues(filtered, allData, input)
     const ramFilter = filterValue['Memory'] || [];
     filtered = filtered.filter(laptop => ramFilter.length === 0 || ramFilter.includes(findRam(input, laptop).summary));
 
+    setStorageValues(filtered, allData, input)
     const storageFilter = filterValue['Storage'] || [];
     filtered = filtered.filter(laptop => storageFilter.length === 0 || storageFilter.includes(findStorage(input, laptop).summary));
 
@@ -150,7 +151,7 @@ export const filterValueChanged = (input: LaptopFilters, filterValue, allData) =
     filteredData.splice(1, filteredData.length - 1);
     filtered.forEach(l => {
         let cpu = findCpu(input, l).shortName;
-        filteredData.push([l.title, cpu, l.gpu, l.ram, l.storage, +l.priceAfterDiscount]);
+        filteredData.push([l.title, cpu, l.gpu, l.ram, l.storage, +l.priceAfterDiscount, l.url]);
     });
     return filteredData
 }

@@ -3,28 +3,24 @@ import VueTableDynamic from "../VueTableDynamic.vue"
 import Dropdown from '../Dropdown.vue'
 import VueMsg from 'vue-msgs'
 
-import {lenovoLaptops} from '@/utils/lenovo-outlet-laptops'
 import {filterValueChanged} from '@/utils/filterLogic'
-import {cpuMappings} from '@/utils/cpu-mappings'
-import {gpuMappings} from "@/utils/gpu-mappings";
-import {ramMappings} from "@/utils/ram-mappings";
-import {storageMappings} from "@/utils/storage-mappings";
 import {LaptopFilters} from "@/models/models";
 
 const cloneDeep = require('lodash.clonedeep')
 
 const input: LaptopFilters = {
-    items: lenovoLaptops,
-    cpuMappings,
-    gpuMappings,
-    ramMappings,
-    storageMappings
+    items: [],
+    cpuMappings: [],
+    gpuMappings: [],
+    ramMappings: [],
+    storageMappings: []
 };
 
 const defaultTableParams = {
     data: [
-        ['Name', `CPU`, `GPU`, `RAM`, `Storage`, `Price`]
+        ['Name', `CPU`, `GPU`, `RAM`, `Storage`, `Price`, `URL`]
     ],
+    label: 'Loading...',
     header: 'row',
     height: '',
     headerHeight: 30,
@@ -40,7 +36,7 @@ const defaultTableParams = {
     // activedColor: '#046FDB',
     headerBgColor: '#efefef',
     // columnWidth: [{column: 0, width: 120}, {column: 1, width: 150}, {column: 2, width: '30%'}, {column: 3, width: 200},],
-    columnWidth: [{column: 5, width: 100}],
+    columnWidth: [{column: 5, width: 100}, {column: 6, width: 100}],
     fixed: 1,
     sort: [0, 1, 2, 3, 4, 5
     ],
@@ -73,7 +69,6 @@ const defaultTableParams = {
 }
 
 const allData = {
-    originalItems: lenovoLaptops,
     unfilteredItems: [],
     filteredItems: [],
 
@@ -89,7 +84,7 @@ const allData = {
     gpuModel: []
 };
 
-allData.unfilteredItems.push(['Name', `CPU`, `GPU`, `RAM`, `Storage`, `Price`]);
+allData.unfilteredItems.push(['Name', `CPU`, `GPU`, `RAM`, `Storage`, `Price`, `URL`]);
 
 allData.filteredItems.push(...allData.unfilteredItems)
 defaultTableParams.data = allData.filteredItems
@@ -152,7 +147,22 @@ export default {
         }
     },
     mounted() {
-        this.filterValueChanged()
+        const fetch = require('axios');
+        return fetch(`https://lex-app2.herokuapp.com/value`, {
+            method: "GET"
+        }).then(response => {
+            this.params.label = response.data.time;
+            input.items = response.data.items;
+            input.cpuMappings = response.data.mappings.cpuMappings;
+            input.gpuMappings = response.data.mappings.gpuMappings;
+            input.storageMappings = response.data.mappings.storageMappings;
+            input.ramMappings = response.data.mappings.ramMappings;
+            this.filterValueChanged();
+            return response;
+        }).catch(err => {
+            alert('Failed to load data for whatever reason!');
+        });
+
     },
     methods: {
         reset() {
